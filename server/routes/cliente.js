@@ -56,7 +56,6 @@ app.get('/clientes/:id', [verificaToken],(req, res) =>{
     }
 
     // Si su Perfil es VALIDADOR Obtiene estos datos
-    // TODO Cambiar atributo rol por el dado en el csv y cambiar la comparacion
     if(req.usuario.rol === 'VALIDADOR_ROLE'){
 
         // Metodo .find para buscar en base de datos de clientes
@@ -102,6 +101,41 @@ app.get('/clientes/:id', [verificaToken],(req, res) =>{
     }
 
 
+    // Si su Perfil es RESTRINGIDO Obtiene estos datos
+   // TODO Cambiar el rol por el atributo correcto y cambiar la comparacion
+    if(req.usuario.rol === 'RESTRINGIDO_ROLE'){
+    
+    // Metodo .find para buscar en base de datos de clientes, el segundo parametro filtra solo la informacion que se quiere mostrar
+    Clientes.find({cuenta: id}, 'nombre apellido cuenta email deuda buro solicitudPrestamo')
+        
+    // metodo .exec para obtener error y arreglo de clientes según la consulta
+       .exec( (err, clientes) => {
+    
+        // Si se encuentra un error responde en formato json con la info del error
+        if(err){
+            return res.status(400).json({
+                err
+            })
+        }
+
+        
+        // La respuesta a la busqueda en base de datos retorna un objeto con los clientes que cumplan la condicion
+        // En ese caso si el tamaño del arreglo es igual a cero se responde en formato json las no concidencias
+        if(clientes.length <= 0){
+         return res.status(400).json({
+             msg: 'No se han encontrado usuarios con ese ID'
+         })
+     }
+
+        // OK!!!!!!! Si todo sale bien se responde con la info del usuario que hace la solicitud y la información del cliente encontrado
+
+           res.json({
+            usuario: req.usuario,
+            cliente: clientes[0]
+        });
+
+       })
+}
 
 })
 
